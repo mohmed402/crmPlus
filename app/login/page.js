@@ -176,19 +176,7 @@ export default function LoginPage() {
           </button>
         </form>
 
-        <div style={{ 
-          marginTop: '1.5rem', 
-          padding: '1rem', 
-          backgroundColor: '#f3f4f6', 
-          borderRadius: '6px', 
-          fontSize: '0.875rem', 
-          color: '#6b7280',
-          border: '1px solid #e5e7eb'
-        }}>
-          <strong style={{ color: '#18375C' }}>حسابات افتراضية:</strong><br />
-          المالك: admin / admin123<br />
-          العامل: worker / worker123
-        </div>
+
       </div>
     </div>
   );
