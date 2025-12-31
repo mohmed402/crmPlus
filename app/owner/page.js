@@ -70,16 +70,16 @@ export default function OwnerPage() {
     <AuthGuard requiredRole="owner">
       <div style={{ direction: 'rtl', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <Navbar />
-        <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#18375C', marginBottom: '2rem' }}>
+        <div style={{ padding: 'clamp(1rem, 3vw, 2rem)', maxWidth: '1400px', margin: '0 auto' }}>
+          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: '700', color: '#18375C', marginBottom: '2rem' }}>
             صفحة التقرير
           </h1>
 
           {/* Reports Summary */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '1.5rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 'clamp(1rem, 2vw, 1.5rem)',
             marginBottom: '2rem'
           }}>
             <div style={{
@@ -102,13 +102,32 @@ export default function OwnerPage() {
               padding: '1.5rem',
               borderRadius: '8px',
               boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
+              borderLeft: '4px solid #f59e0b'
+            }}>
+              <div style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                مصروفات الطلبات
+                <span style={{ fontSize: '0.75rem', color: '#9ca3af' }}>(مرتبطة بالطلبات)</span>
+              </div>
+              <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#f59e0b' }}>
+                {reports ? `${reports.totalExpenses.toFixed(2)} LYD` : '0.00 LYD'}
+              </div>
+            </div>
+
+            <div style={{
+              backgroundColor: 'white',
+              padding: '1.5rem',
+              borderRadius: '8px',
+              boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
               borderLeft: '4px solid #ef4444'
             }}>
-              <div style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.5rem' }}>
-                إجمالي المصروفات
+              <div style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '0.5rem', display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
+                المصروفات العامة
+                <Link href="/expenses" style={{ fontSize: '0.75rem', color: '#3b82f6', textDecoration: 'none' }}>
+                  (عرض)
+                </Link>
               </div>
               <div style={{ fontSize: '2rem', fontWeight: 'bold', color: '#ef4444' }}>
-                {reports ? `${reports.totalExpenses.toFixed(2)} LYD` : '0.00 LYD'}
+                {reports ? `${reports.generalExpenses.toFixed(2)} LYD` : '0.00 LYD'}
               </div>
             </div>
 
@@ -129,19 +148,25 @@ export default function OwnerPage() {
               }}>
                 {reports ? `${reports.netProfit.toFixed(2)} LYD` : '0.00 LYD'}
               </div>
+              {reports && reports.totalAllExpenses > 0 && (
+                <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
+                  بعد خصم {reports.totalAllExpenses.toFixed(2)} LYD مصروفات
+                </div>
+              )}
             </div>
           </div>
 
           {/* Filters */}
           <div style={{
             backgroundColor: 'white',
-            padding: '1.5rem',
+            padding: 'clamp(1rem, 2vw, 1.5rem)',
             borderRadius: '8px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
             marginBottom: '2rem',
             display: 'flex',
             gap: '1rem',
-            alignItems: 'center'
+            alignItems: 'center',
+            flexWrap: 'wrap'
           }}>
             <label style={{ color: '#374151', fontWeight: '500' }}>الفترة:</label>
             <select
@@ -189,7 +214,8 @@ export default function OwnerPage() {
               overflow: 'hidden',
               boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
             }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                     <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>رقم الطلب</th>
@@ -208,6 +234,7 @@ export default function OwnerPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </div>

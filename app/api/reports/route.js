@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getTotalProfit, getTotalExpenses } from '@/lib/finance';
+import { getTotalGeneralExpenses } from '@/lib/generalExpenses';
 
 export async function GET(request) {
   try {
@@ -25,14 +26,18 @@ export async function GET(request) {
     if (endDate) filters.endDate = endDate;
     
     const totalProfit = await getTotalProfit(filters);
-    const totalExpenses = await getTotalExpenses(filters);
+    const totalExpenses = await getTotalExpenses(filters); // Order-specific expenses
+    const generalExpenses = await getTotalGeneralExpenses(startDate, endDate); // General business expenses
     
     return NextResponse.json({
       totalProfit,
-      totalExpenses,
-      netProfit: totalProfit - totalExpenses
+      totalExpenses, // Order-specific expenses
+      generalExpenses, // General business expenses
+      totalAllExpenses: totalExpenses + generalExpenses, // Combined expenses
+      netProfit: totalProfit - totalExpenses - generalExpenses // Net profit after all expenses
     });
   } catch (error) {
+    console.error('Error fetching reports:', error);
     return NextResponse.json(
       { error: 'Failed to fetch reports' },
       { status: 500 }

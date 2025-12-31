@@ -10,6 +10,9 @@ export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState([]);
   const [loading, setLoading] = useState(true);
   const [searchQuery, setSearchQuery] = useState('');
+  const [selectedCustomer, setSelectedCustomer] = useState(null);
+  const [customerOrders, setCustomerOrders] = useState([]);
+  const [loadingOrders, setLoadingOrders] = useState(false);
 
   useEffect(() => {
     fetchCustomers();
@@ -35,6 +38,47 @@ export default function AdminCustomersPage() {
     return date.toLocaleDateString('ar-LY');
   };
 
+  const fetchCustomerOrders = async (customer) => {
+    setLoadingOrders(true);
+    setSelectedCustomer(customer);
+    try {
+      const res = await fetch(`/api/customers/${customer.id}/orders`);
+      const data = await res.json();
+      if (res.ok) {
+        setCustomerOrders(data.orders || []);
+      }
+    } catch (error) {
+      console.error('Failed to fetch customer orders:', error);
+      setCustomerOrders([]);
+    }
+    setLoadingOrders(false);
+  };
+
+  const closeOrderHistory = () => {
+    setSelectedCustomer(null);
+    setCustomerOrders([]);
+  };
+
+  const getStatusLabel = (status) => {
+    const labels = {
+      'New': 'جديد',
+      'Shipped': 'تم الشحن',
+      'Delivered': 'تم التسليم',
+      'Cancelled': 'ملغي'
+    };
+    return labels[status] || status;
+  };
+
+  const getStatusColor = (status) => {
+    const colors = {
+      'New': '#3b82f6',
+      'Shipped': '#f59e0b',
+      'Delivered': '#2caf76',
+      'Cancelled': '#ef4444'
+    };
+    return colors[status] || '#6b7280';
+  };
+
   const filteredCustomers = customers.filter(customer => {
     if (!searchQuery) return true;
     const query = searchQuery.toLowerCase();
@@ -56,16 +100,16 @@ export default function AdminCustomersPage() {
     <AuthGuard requiredRole="owner">
       <div style={{ direction: 'rtl', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <Navbar />
-        <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#18375C', marginBottom: '2rem' }}>
+        <div style={{ padding: 'clamp(1rem, 3vw, 2rem)', maxWidth: '1400px', margin: '0 auto' }}>
+          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: '700', color: '#18375C', marginBottom: '2rem' }}>
             إدارة العملاء
           </h1>
 
           {/* Summary Cards */}
           <div style={{
             display: 'grid',
-            gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))',
-            gap: '1.5rem',
+            gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+            gap: 'clamp(1rem, 2vw, 1.5rem)',
             marginBottom: '2rem'
           }}>
             <div style={{
@@ -132,7 +176,7 @@ export default function AdminCustomersPage() {
           {/* Search Bar */}
           <div style={{
             backgroundColor: 'white',
-            padding: '1.5rem',
+            padding: 'clamp(1rem, 2vw, 1.5rem)',
             borderRadius: '8px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
             marginBottom: '2rem'
@@ -167,8 +211,8 @@ export default function AdminCustomersPage() {
               overflow: 'hidden',
               boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
             }}>
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '1000px' }}>
+              <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '900px' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                       <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>الاسم</th>
@@ -179,6 +223,7 @@ export default function AdminCustomersPage() {
                       <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>إجمالي الإيرادات</th>
                       <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>إجمالي الربح</th>
                       <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>تاريخ التسجيل</th>
+                      <th style={{ padding: '1rem', textAlign: 'center', fontWeight: '600', color: '#18375C' }}>إجراءات</th>
                     </tr>
                   </thead>
                   <tbody>
@@ -256,6 +301,27 @@ export default function AdminCustomersPage() {
                         <td style={{ padding: '1rem', color: '#6b7280', fontSize: '0.875rem' }}>
                           {formatDate(customer.created_at)}
                         </td>
+                        <td style={{ padding: '1rem', textAlign: 'center' }}>
+                          <button
+                            onClick={() => fetchCustomerOrders(customer)}
+                            style={{
+                              padding: '0.5rem 1rem',
+                              backgroundColor: '#18375C',
+                              color: 'white',
+                              border: 'none',
+                              borderRadius: '6px',
+                              fontSize: '0.875rem',
+                              fontWeight: '500',
+                              cursor: 'pointer',
+                              transition: 'all 0.2s',
+                              fontFamily: 'Cairo',
+                            }}
+                            onMouseOver={(e) => e.target.style.backgroundColor = '#0f2744'}
+                            onMouseOut={(e) => e.target.style.backgroundColor = '#18375C'}
+                          >
+                            عرض الطلبات
+                          </button>
+                        </td>
                       </tr>
                     ))}
                   </tbody>
@@ -264,6 +330,158 @@ export default function AdminCustomersPage() {
             </div>
           )}
         </div>
+
+        {/* Order History Modal */}
+        {selectedCustomer && (
+          <div
+            style={{
+              position: 'fixed',
+              top: 0,
+              left: 0,
+              right: 0,
+              bottom: 0,
+              backgroundColor: 'rgba(0,0,0,0.5)',
+              display: 'flex',
+              alignItems: 'center',
+              justifyContent: 'center',
+              zIndex: 1000,
+              padding: '1rem'
+            }}
+            onClick={closeOrderHistory}
+          >
+            <div
+              style={{
+                backgroundColor: 'white',
+                borderRadius: '12px',
+                maxWidth: '1200px',
+                width: '100%',
+                maxHeight: '90vh',
+                overflow: 'hidden',
+                display: 'flex',
+                flexDirection: 'column'
+              }}
+              onClick={(e) => e.stopPropagation()}
+            >
+              {/* Modal Header */}
+              <div style={{
+                padding: 'clamp(1rem, 2vw, 1.5rem)',
+                borderBottom: '1px solid #e5e7eb',
+                display: 'flex',
+                justifyContent: 'space-between',
+                alignItems: 'center',
+                backgroundColor: '#f9fafb',
+                flexWrap: 'wrap',
+                gap: '1rem'
+              }}>
+                <h2 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', fontWeight: '700', color: '#18375C', margin: 0 }}>
+                  طلبات العميل: {selectedCustomer.name}
+                </h2>
+                <button
+                  onClick={closeOrderHistory}
+                  style={{
+                    backgroundColor: '#ef4444',
+                    color: 'white',
+                    border: 'none',
+                    borderRadius: '6px',
+                    padding: '0.5rem 1rem',
+                    cursor: 'pointer',
+                    fontSize: '0.875rem',
+                    fontWeight: '500'
+                  }}
+                >
+                  إغلاق
+                </button>
+              </div>
+
+              {/* Modal Body */}
+              <div style={{ padding: 'clamp(1rem, 2vw, 1.5rem)', overflowY: 'auto', flex: 1 }}>
+                {loadingOrders ? (
+                  <div style={{ textAlign: 'center', padding: '2rem' }}>جاري التحميل...</div>
+                ) : customerOrders.length === 0 ? (
+                  <div style={{ textAlign: 'center', padding: '2rem', color: '#6b7280' }}>
+                    لا توجد طلبات لهذا العميل
+                  </div>
+                ) : (
+                  <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                    <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
+                      <thead>
+                        <tr style={{ backgroundColor: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
+                          <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>رقم الطلب</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>المنتج</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>الحالة</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>الإيرادات</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>الربح</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>التاريخ</th>
+                          <th style={{ padding: '0.75rem', textAlign: 'center', fontWeight: '600', color: '#18375C' }}>عرض</th>
+                        </tr>
+                      </thead>
+                      <tbody>
+                        {customerOrders.map((order) => (
+                          <tr key={order.id} style={{ borderBottom: '1px solid #e5e7eb' }}>
+                            <td style={{ padding: '0.75rem', fontWeight: '600', color: '#18375C' }}>
+                              #{order.id}
+                            </td>
+                            <td style={{ padding: '0.75rem', color: '#1f2937' }}>
+                              {order.product_name}
+                              {order.product_count > 1 && (
+                                <span style={{ color: '#6b7280', fontSize: '0.875rem', marginRight: '0.5rem' }}>
+                                  (+{order.product_count - 1} أخرى)
+                                </span>
+                              )}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <span style={{
+                                padding: '0.25rem 0.75rem',
+                                borderRadius: '12px',
+                                backgroundColor: `${getStatusColor(order.status)}20`,
+                                color: getStatusColor(order.status),
+                                fontSize: '0.875rem',
+                                fontWeight: '600',
+                                display: 'inline-block'
+                              }}>
+                                {getStatusLabel(order.status)}
+                              </span>
+                            </td>
+                            <td style={{ padding: '0.75rem', color: '#f59e0b', fontWeight: '600' }}>
+                              {order.selling_price_lyd ? `${parseFloat(order.selling_price_lyd).toFixed(2)} LYD` : '-'}
+                            </td>
+                            <td style={{ padding: '0.75rem' }}>
+                              <span style={{
+                                color: (order.profit_lyd || 0) >= 0 ? '#2caf76' : '#ef4444',
+                                fontWeight: 'bold'
+                              }}>
+                                {order.profit_lyd ? `${parseFloat(order.profit_lyd).toFixed(2)} LYD` : '-'}
+                              </span>
+                            </td>
+                            <td style={{ padding: '0.75rem', color: '#6b7280', fontSize: '0.875rem' }}>
+                              {formatDate(order.created_at)}
+                            </td>
+                            <td style={{ padding: '0.75rem', textAlign: 'center' }}>
+                              <Link
+                                href={`/orders/${order.id}`}
+                                style={{
+                                  padding: '0.375rem 0.75rem',
+                                  backgroundColor: '#3b82f6',
+                                  color: 'white',
+                                  borderRadius: '6px',
+                                  textDecoration: 'none',
+                                  fontSize: '0.875rem',
+                                  display: 'inline-block'
+                                }}
+                              >
+                                عرض
+                              </Link>
+                            </td>
+                          </tr>
+                        ))}
+                      </tbody>
+                    </table>
+                  </div>
+                )}
+              </div>
+            </div>
+          </div>
+        )}
       </div>
     </AuthGuard>
   );

@@ -49,11 +49,12 @@ export default function LoginPage() {
       alignItems: 'center',
       minHeight: '100vh',
       backgroundColor: '#f9fafb',
-      direction: 'rtl'
+      direction: 'rtl',
+      padding: '1rem'
     }}>
       <div style={{
         backgroundColor: 'white',
-        padding: '2.5rem',
+        padding: 'clamp(1.5rem, 4vw, 2.5rem)',
         borderRadius: '12px',
         boxShadow: '0 4px 12px rgba(24, 55, 92, 0.15)',
         width: '100%',

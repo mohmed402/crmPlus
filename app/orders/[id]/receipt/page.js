@@ -87,9 +87,9 @@ export default function ReceiptPage() {
     <AuthGuard>
       <div style={{ direction: 'rtl', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <Navbar />
-        <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
+        <div style={{ padding: 'clamp(1rem, 3vw, 2rem)', maxWidth: '800px', margin: '0 auto' }}>
           {/* Print Button - Hidden when printing */}
-          <div style={{ marginBottom: '2rem', textAlign: 'left' }} className="no-print">
+          <div style={{ marginBottom: '2rem', textAlign: 'left', display: 'flex', gap: '0.5rem', flexWrap: 'wrap' }} className="no-print">
             <button
               onClick={handlePrint}
               style={{
@@ -136,7 +136,7 @@ export default function ReceiptPage() {
           {/* Receipt Content */}
           <div style={{
             backgroundColor: 'white',
-            padding: '3rem',
+            padding: 'clamp(1.5rem, 4vw, 3rem)',
             borderRadius: '8px',
             boxShadow: '0 4px 6px rgba(0,0,0,0.1)',
             fontFamily: "'Cairo', sans-serif",
@@ -185,8 +185,8 @@ export default function ReceiptPage() {
             <div style={{ marginBottom: '2rem' }}>
               <div style={{
                 display: 'grid',
-                gridTemplateColumns: 'repeat(2, 1fr)',
-                gap: '1.5rem',
+                gridTemplateColumns: 'repeat(auto-fit, minmax(200px, 1fr))',
+                gap: 'clamp(1rem, 2vw, 1.5rem)',
                 marginBottom: '1.5rem'
               }}>
                 <div>
@@ -230,12 +230,12 @@ export default function ReceiptPage() {
               {/* Customer Info */}
               <div style={{
                 backgroundColor: '#f9fafb',
-                padding: '1.5rem',
+                padding: 'clamp(1rem, 2vw, 1.5rem)',
                 borderRadius: '6px',
                 marginBottom: '1.5rem'
               }}>
                 <h2 style={{
-                  fontSize: '1.125rem',
+                  fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
                   fontWeight: '600',
                   color: '#18375C',
                   marginBottom: '1rem',
@@ -245,7 +245,7 @@ export default function ReceiptPage() {
                 </h2>
                 <div style={{
                   display: 'grid',
-                  gridTemplateColumns: 'repeat(2, 1fr)',
+                  gridTemplateColumns: 'repeat(auto-fit, minmax(150px, 1fr))',
                   gap: '1rem'
                 }}>
                   <div>
@@ -309,9 +309,9 @@ export default function ReceiptPage() {
             </div>
 
             {/* Products Table */}
-            <div style={{ marginBottom: '2rem' }}>
+            <div style={{ marginBottom: '2rem', overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
               <h2 style={{
-                fontSize: '1.125rem',
+                fontSize: 'clamp(1rem, 2.5vw, 1.125rem)',
                 fontWeight: '600',
                 color: '#18375C',
                 marginBottom: '1rem',
@@ -322,7 +322,8 @@ export default function ReceiptPage() {
               <table style={{
                 width: '100%',
                 borderCollapse: 'collapse',
-                fontFamily: "'Cairo', sans-serif"
+                fontFamily: "'Cairo', sans-serif",
+                minWidth: '500px'
               }}>
                 <thead>
                   <tr style={{

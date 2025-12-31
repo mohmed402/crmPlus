@@ -12,7 +12,9 @@ export default function NewOrderPage() {
     phone: '',
     address: '',
     notes: '',
-    status: 'New'
+    status: 'New',
+    deposit_paid: false,
+    amount_paid: 0
   });
   const [socialMedia, setSocialMedia] = useState({
     facebook: '',
@@ -136,8 +138,8 @@ export default function NewOrderPage() {
     <AuthGuard>
       <div style={{ direction: 'rtl', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <Navbar />
-        <div style={{ padding: '2rem', maxWidth: '800px', margin: '0 auto' }}>
-          <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#18375C', marginBottom: '2rem' }}>
+        <div style={{ padding: 'clamp(1rem, 3vw, 2rem)', maxWidth: '800px', margin: '0 auto' }}>
+          <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: '700', color: '#18375C', marginBottom: '2rem' }}>
             إدخال طلب جديد
           </h1>
 
@@ -155,7 +157,7 @@ export default function NewOrderPage() {
 
           <form onSubmit={handleSubmit} style={{
             backgroundColor: 'white',
-            padding: '2rem',
+            padding: 'clamp(1rem, 3vw, 2rem)',
             borderRadius: '8px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
           }}>
@@ -226,12 +228,62 @@ export default function NewOrderPage() {
                 />
               </div>
 
+              {/* Payment Information */}
+              <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb' }}>
+                <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#18375C', marginBottom: '1rem' }}>
+                  معلومات الدفع
+                </h3>
+                
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
+                    <input
+                      type="checkbox"
+                      name="deposit_paid"
+                      checked={formData.deposit_paid}
+                      onChange={(e) => setFormData({ ...formData, deposit_paid: e.target.checked })}
+                      style={{
+                        width: '1.25rem',
+                        height: '1.25rem',
+                        cursor: 'pointer',
+                        accentColor: '#18375C'
+                      }}
+                    />
+                    <span style={{ color: '#374151', fontWeight: '500' }}>
+                      تم دفع الدفعة المقدمة
+                    </span>
+                  </label>
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
+                    المبلغ المدفوع (LYD)
+                  </label>
+                  <input
+                    type="number"
+                    name="amount_paid"
+                    value={formData.amount_paid}
+                    onChange={handleChange}
+                    step="0.01"
+                    min="0"
+                    placeholder="0.00"
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      fontSize: '1rem',
+                      fontFamily: 'inherit'
+                    }}
+                  />
+                </div>
+              </div>
+
               {/* Social Media Section */}
               <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#18375C', marginBottom: '1rem' }}>
                   حسابات التواصل الاجتماعي (اختياري)
                 </h3>
-                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+                <div style={{ display: 'flex', gap: '1rem', alignItems: 'center', flexWrap: 'wrap' }}>
                   {/* Facebook */}
                   <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem' }}>
                     {editingSocialMedia === 'facebook' ? (
@@ -376,8 +428,8 @@ export default function NewOrderPage() {
             </div>
 
             <div style={{ marginBottom: '1.5rem' }}>
-              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem' }}>
-                <h2 style={{ fontSize: '1.25rem', fontWeight: '600', color: '#18375C' }}>
+              <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1rem', flexWrap: 'wrap', gap: '1rem' }}>
+                <h2 style={{ fontSize: 'clamp(1.1rem, 3vw, 1.25rem)', fontWeight: '600', color: '#18375C' }}>
                   المنتجات
                 </h2>
                 <button
@@ -402,8 +454,8 @@ export default function NewOrderPage() {
                 </button>
               </div>
 
-              <div style={{ overflowX: 'auto', marginBottom: '1rem' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white', borderRadius: '6px' }}>
+              <div style={{ overflowX: 'auto', marginBottom: '1rem', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', backgroundColor: 'white', borderRadius: '6px', minWidth: '700px' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                       <th style={{ padding: '0.75rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>اسم المنتج *</th>
@@ -591,7 +643,7 @@ export default function NewOrderPage() {
               </div>
             </div>
 
-            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end' }}>
+            <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', flexWrap: 'wrap' }}>
               <button
                 type="button"
                 onClick={() => router.back()}
@@ -603,7 +655,9 @@ export default function NewOrderPage() {
                   borderRadius: '6px',
                   fontSize: '1rem',
                   cursor: 'pointer',
-                  fontWeight: '500'
+                  fontWeight: '500',
+                  flex: '1 1 auto',
+                  minWidth: '120px'
                 }}
               >
                 إلغاء
@@ -622,7 +676,9 @@ export default function NewOrderPage() {
                   fontWeight: '600',
                   fontFamily: 'inherit',
                   transition: 'background-color 0.2s, transform 0.1s',
-                  boxShadow: loading ? 'none' : '0 2px 4px rgba(24, 55, 92, 0.2)'
+                  boxShadow: loading ? 'none' : '0 2px 4px rgba(24, 55, 92, 0.2)',
+                  flex: '1 1 auto',
+                  minWidth: '120px'
                 }}
                 onMouseEnter={(e) => {
                   if (!loading) {

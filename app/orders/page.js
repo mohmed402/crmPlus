@@ -59,9 +59,9 @@ export default function OrdersPage() {
     <AuthGuard>
       <div style={{ direction: 'rtl', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <Navbar />
-        <div style={{ padding: '2rem', maxWidth: '1400px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#18375C' }}>
+        <div style={{ padding: 'clamp(1rem, 3vw, 2rem)', maxWidth: '1400px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: '700', color: '#18375C' }}>
               صفحة الطلبات
             </h1>
             <Link href="/orders/new">
@@ -104,7 +104,8 @@ export default function OrdersPage() {
               overflow: 'hidden',
               boxShadow: '0 1px 3px rgba(0,0,0,0.1)'
             }}>
-              <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div style={{ overflowX: 'auto' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '800px' }}>
                 <thead>
                   <tr style={{ backgroundColor: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                     <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>رقم الطلب</th>
@@ -167,6 +168,7 @@ export default function OrdersPage() {
                   ))}
                 </tbody>
               </table>
+              </div>
             </div>
           )}
         </div>

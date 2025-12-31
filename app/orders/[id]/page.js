@@ -157,30 +157,31 @@ export default function OrderDetailPage() {
     <AuthGuard>
       <div style={{ direction: 'rtl', minHeight: '100vh', backgroundColor: '#f9fafb' }}>
         <Navbar />
-        <div style={{ padding: '2rem', maxWidth: '1200px', margin: '0 auto' }}>
-          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem' }}>
-            <h1 style={{ fontSize: '2rem', fontWeight: '700', color: '#18375C' }}>
+        <div style={{ padding: 'clamp(1rem, 3vw, 2rem)', maxWidth: '1200px', margin: '0 auto' }}>
+          <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '2rem', flexWrap: 'wrap', gap: '1rem' }}>
+            <h1 style={{ fontSize: 'clamp(1.5rem, 4vw, 2rem)', fontWeight: '700', color: '#18375C' }}>
               الطلب #{order.id}
             </h1>
             {!editing && (
-              <div style={{ display: 'flex', gap: '1rem', alignItems: 'center' }}>
+              <div style={{ display: 'flex', gap: '0.5rem', alignItems: 'center', flexWrap: 'wrap' }}>
                 <button
                   onClick={() => router.push(`/orders/${params.id}/receipt`)}
                   style={{
                     display: 'flex',
                     alignItems: 'center',
                     gap: '0.5rem',
-                    padding: '0.75rem 1.5rem',
+                    padding: '0.625rem 1rem',
                     backgroundColor: '#2caf76',
                     color: 'white',
                     border: 'none',
                     borderRadius: '6px',
-                    fontSize: '1rem',
+                    fontSize: 'clamp(0.875rem, 2vw, 1rem)',
                     cursor: 'pointer',
                     fontWeight: '600',
                     fontFamily: 'inherit',
                     transition: 'background-color 0.2s, transform 0.1s',
-                    boxShadow: '0 2px 4px rgba(44, 175, 118, 0.2)'
+                    boxShadow: '0 2px 4px rgba(44, 175, 118, 0.2)',
+                    whiteSpace: 'nowrap'
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.backgroundColor = '#239a5f';
@@ -203,17 +204,18 @@ export default function OrderDetailPage() {
                 <button
                   onClick={() => setEditing(true)}
                   style={{
-                    padding: '0.75rem 1.5rem',
+                    padding: '0.625rem 1rem',
                     backgroundColor: '#18375C',
                     color: 'white',
                     border: 'none',
                     borderRadius: '6px',
-                    fontSize: '1rem',
+                    fontSize: 'clamp(0.875rem, 2vw, 1rem)',
                     cursor: 'pointer',
                     fontWeight: '600',
                     fontFamily: 'inherit',
                     transition: 'background-color 0.2s, transform 0.1s',
-                    boxShadow: '0 2px 4px rgba(24, 55, 92, 0.2)'
+                    boxShadow: '0 2px 4px rgba(24, 55, 92, 0.2)',
+                    whiteSpace: 'nowrap'
                   }}
                   onMouseEnter={(e) => {
                     e.target.style.backgroundColor = '#0f2340';
@@ -232,17 +234,17 @@ export default function OrderDetailPage() {
 
           <div style={{
             backgroundColor: 'white',
-            padding: '2rem',
+            padding: 'clamp(1rem, 3vw, 2rem)',
             borderRadius: '12px',
             boxShadow: '0 2px 8px rgba(0,0,0,0.08)',
             marginBottom: '2rem',
             border: '1px solid #e5e7eb'
           }}>
-            <h2 style={{ fontSize: '1.5rem', fontWeight: '700', color: '#18375C', marginBottom: '2rem' }}>
+            <h2 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', fontWeight: '700', color: '#18375C', marginBottom: '2rem' }}>
               معلومات الطلب
             </h2>
 
-            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(2, 1fr)', gap: '2rem' }}>
+            <div style={{ display: 'grid', gridTemplateColumns: 'repeat(auto-fit, minmax(250px, 1fr))', gap: 'clamp(1rem, 2vw, 2rem)' }}>
               <div>
                 <label style={{ display: 'block', marginBottom: '0.75rem', color: '#6b7280', fontWeight: '600', fontSize: '0.875rem', textTransform: 'uppercase' }}>
                   اسم العميل
@@ -311,6 +313,82 @@ export default function OrderDetailPage() {
                     fontWeight: '500'
                   }}>
                     {order.phone || '-'}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.75rem', color: '#6b7280', fontWeight: '600', fontSize: '0.875rem', textTransform: 'uppercase' }}>
+                  حالة الدفعة المقدمة
+                </label>
+                {editing ? (
+                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.875rem' }}>
+                    <input
+                      type="checkbox"
+                      name="deposit_paid"
+                      checked={formData.deposit_paid || false}
+                      onChange={(e) => setFormData({ ...formData, deposit_paid: e.target.checked })}
+                      style={{
+                        width: '1.25rem',
+                        height: '1.25rem',
+                        cursor: 'pointer',
+                        accentColor: '#18375C'
+                      }}
+                    />
+                    <span style={{ fontSize: '1rem', color: '#1f2937', fontWeight: '500' }}>
+                      تم دفع الدفعة المقدمة
+                    </span>
+                  </div>
+                ) : (
+                  <div style={{ 
+                    padding: '0.875rem', 
+                    backgroundColor: order.deposit_paid ? '#d1fae5' : '#fee2e2', 
+                    borderRadius: '8px',
+                    color: order.deposit_paid ? '#065f46' : '#991b1b',
+                    fontSize: '1.05rem',
+                    fontWeight: '600',
+                    border: order.deposit_paid ? '2px solid #10b981' : '2px solid #ef4444',
+                    textAlign: 'center'
+                  }}>
+                    {order.deposit_paid ? '✓ تم الدفع' : '✗ لم يتم الدفع'}
+                  </div>
+                )}
+              </div>
+
+              <div>
+                <label style={{ display: 'block', marginBottom: '0.75rem', color: '#6b7280', fontWeight: '600', fontSize: '0.875rem', textTransform: 'uppercase' }}>
+                  المبلغ المدفوع (LYD)
+                </label>
+                {editing ? (
+                  <input
+                    type="number"
+                    name="amount_paid"
+                    value={formData.amount_paid || 0}
+                    onChange={handleChange}
+                    step="0.01"
+                    min="0"
+                    style={{
+                      width: '100%',
+                      padding: '0.875rem',
+                      border: '2px solid #e5e7eb',
+                      borderRadius: '8px',
+                      fontSize: '1rem',
+                      transition: 'border-color 0.2s',
+                      outline: 'none'
+                    }}
+                    onFocus={(e) => e.target.style.borderColor = '#18375C'}
+                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
+                  />
+                ) : (
+                  <div style={{ 
+                    padding: '0.875rem', 
+                    backgroundColor: '#f9fafb', 
+                    borderRadius: '8px',
+                    color: '#1f2937',
+                    fontSize: '1.05rem',
+                    fontWeight: '500'
+                  }}>
+                    {order.amount_paid ? `${parseFloat(order.amount_paid).toFixed(2)} LYD` : '0.00 LYD'}
                   </div>
                 )}
               </div>
@@ -543,7 +621,7 @@ export default function OrderDetailPage() {
             </div>
 
             {editing && (
-              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem' }}>
+              <div style={{ display: 'flex', gap: '1rem', justifyContent: 'flex-end', marginTop: '1.5rem', flexWrap: 'wrap' }}>
                 <button
                   onClick={() => {
                     setEditing(false);
@@ -557,7 +635,9 @@ export default function OrderDetailPage() {
                     borderRadius: '6px',
                     fontSize: '1rem',
                     cursor: 'pointer',
-                    fontWeight: '500'
+                    fontWeight: '500',
+                    flex: '1 1 auto',
+                    minWidth: '120px'
                   }}
                 >
                   إلغاء
@@ -576,7 +656,9 @@ export default function OrderDetailPage() {
                     fontWeight: '600',
                     fontFamily: 'inherit',
                     transition: 'background-color 0.2s, transform 0.1s',
-                    boxShadow: saving ? 'none' : '0 2px 4px rgba(24, 55, 92, 0.2)'
+                    boxShadow: saving ? 'none' : '0 2px 4px rgba(24, 55, 92, 0.2)',
+                    flex: '1 1 auto',
+                    minWidth: '120px'
                   }}
                   onMouseEnter={(e) => {
                     if (!saving) {
@@ -607,7 +689,9 @@ export default function OrderDetailPage() {
                     fontWeight: '600',
                     fontFamily: 'inherit',
                     transition: 'background-color 0.2s, transform 0.1s',
-                    boxShadow: saving ? 'none' : '0 2px 4px rgba(44, 175, 118, 0.2)'
+                    boxShadow: saving ? 'none' : '0 2px 4px rgba(44, 175, 118, 0.2)',
+                    flex: '1 1 auto',
+                    minWidth: '120px'
                   }}
                   onMouseEnter={(e) => {
                     if (!saving) {
@@ -631,13 +715,13 @@ export default function OrderDetailPage() {
           {/* Products Section */}
           <div style={{
             backgroundColor: 'white',
-            padding: '2rem',
+            padding: 'clamp(1rem, 3vw, 2rem)',
             borderRadius: '8px',
             boxShadow: '0 1px 3px rgba(0,0,0,0.1)',
             marginBottom: '2rem'
           }}>
-            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem' }}>
-              <h2 style={{ fontSize: '1.5rem', fontWeight: '600', color: '#18375C' }}>
+            <div style={{ display: 'flex', justifyContent: 'space-between', alignItems: 'center', marginBottom: '1.5rem', flexWrap: 'wrap', gap: '1rem' }}>
+              <h2 style={{ fontSize: 'clamp(1.25rem, 3vw, 1.5rem)', fontWeight: '600', color: '#18375C' }}>
                 المنتجات
               </h2>
               {!editing && (
@@ -668,8 +752,8 @@ export default function OrderDetailPage() {
                 لا توجد منتجات
               </div>
             ) : (
-              <div style={{ overflowX: 'auto' }}>
-                <table style={{ width: '100%', borderCollapse: 'collapse' }}>
+              <div style={{ overflowX: 'auto', WebkitOverflowScrolling: 'touch' }}>
+                <table style={{ width: '100%', borderCollapse: 'collapse', minWidth: '700px' }}>
                   <thead>
                     <tr style={{ backgroundColor: '#f9fafb', borderBottom: '2px solid #e5e7eb' }}>
                       <th style={{ padding: '1rem', textAlign: 'right', fontWeight: '600', color: '#18375C' }}>اسم المنتج</th>
@@ -866,6 +950,7 @@ export default function OrderDetailPage() {
             }}>
               <OwnerFinanceSection 
                 orderId={order.id} 
+                order={order}
                 finance={finance} 
                 expenses={expenses}
                 onUpdate={fetchOrder}
@@ -878,7 +963,7 @@ export default function OrderDetailPage() {
   );
 }
 
-function OwnerFinanceSection({ orderId, finance, expenses, onUpdate }) {
+function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
   const [financeData, setFinanceData] = useState({
     cost_try: finance?.cost_try || '',
     fx_try_to_lyd: finance?.fx_try_to_lyd || '',
@@ -1263,6 +1348,64 @@ function OwnerFinanceSection({ orderId, finance, expenses, onUpdate }) {
           }}>
             <span style={{ fontSize: '1.5rem' }}>{profitLyd >= 0 ? '↑' : '↓'}</span>
             {profitLyd !== null ? `${profitLyd.toFixed(2)} LYD` : '-'}
+          </div>
+        </div>
+
+        <div>
+          <label style={{ display: 'block', marginBottom: '0.75rem', color: '#6b7280', fontWeight: '600', fontSize: '0.875rem', textTransform: 'uppercase' }}>
+            المبلغ المدفوع (LYD)
+          </label>
+          <div style={{ 
+            padding: '0.875rem', 
+            backgroundColor: '#dbeafe',
+            borderRadius: '8px',
+            color: '#1e40af',
+            fontSize: '1.05rem',
+            fontWeight: '600',
+            border: '2px solid #93c5fd'
+          }}>
+            {order?.amount_paid ? `${parseFloat(order.amount_paid).toFixed(2)} LYD` : '0.00 LYD'}
+          </div>
+        </div>
+
+        <div>
+          <label style={{ display: 'block', marginBottom: '0.75rem', color: '#6b7280', fontWeight: '600', fontSize: '0.875rem', textTransform: 'uppercase' }}>
+            المبلغ المتبقي (LYD)
+          </label>
+          <div style={{ 
+            padding: '0.875rem', 
+            backgroundColor: (() => {
+              const remaining = (finance?.selling_price_lyd || 0) - (order?.amount_paid || 0);
+              return remaining <= 0 ? '#d1fae5' : '#fef3c7';
+            })(),
+            borderRadius: '8px',
+            color: (() => {
+              const remaining = (finance?.selling_price_lyd || 0) - (order?.amount_paid || 0);
+              return remaining <= 0 ? '#065f46' : '#92400e';
+            })(),
+            fontSize: '1.25rem',
+            fontWeight: '700',
+            border: (() => {
+              const remaining = (finance?.selling_price_lyd || 0) - (order?.amount_paid || 0);
+              return remaining <= 0 ? '2px solid #10b981' : '2px solid #fde68a';
+            })(),
+            display: 'flex',
+            alignItems: 'center',
+            gap: '0.5rem'
+          }}>
+            {(() => {
+              const sellingPrice = parseFloat(finance?.selling_price_lyd) || 0;
+              const amountPaid = parseFloat(order?.amount_paid) || 0;
+              const remaining = sellingPrice - amountPaid;
+              return remaining <= 0 ? (
+                <>
+                  <span style={{ fontSize: '1.5rem' }}>✓</span>
+                  تم الدفع بالكامل
+                </>
+              ) : (
+                `${remaining.toFixed(2)} LYD`
+              );
+            })()}
           </div>
         </div>
 
