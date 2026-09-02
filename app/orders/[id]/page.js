@@ -4,6 +4,13 @@ import { useEffect, useState } from 'react';
 import { useRouter, useParams } from 'next/navigation';
 import Navbar from '../../components/Navbar';
 import { AuthGuard } from '../../components/AuthGuard';
+import {
+  calculateCostLyd,
+  calculateProfitLyd,
+  calculateTotalCostLyd,
+  formatMoney,
+  toNumber
+} from '@/lib/money';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -965,10 +972,10 @@ export default function OrderDetailPage() {
 
 function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
   const [financeData, setFinanceData] = useState({
-    cost_try: finance?.cost_try || '',
-    fx_try_to_lyd: finance?.fx_try_to_lyd || '',
-    shipping_lyd: finance?.shipping_lyd || '',
-    selling_price_lyd: finance?.selling_price_lyd || '',
+    cost_try: finance?.cost_try ?? '',
+    fx_try_to_lyd: finance?.fx_try_to_lyd ?? '',
+    shipping_lyd: finance?.shipping_lyd ?? '',
+    selling_price_lyd: finance?.selling_price_lyd ?? '',
     owner_notes: finance?.owner_notes || ''
   });
   const [editingFinance, setEditingFinance] = useState(!finance);
@@ -1060,20 +1067,20 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
     }
   };
 
-  const costLyd = financeData.cost_try && financeData.fx_try_to_lyd
-    ? parseFloat(financeData.cost_try) * parseFloat(financeData.fx_try_to_lyd)
-    : finance?.cost_lyd || null;
+  const costLyd = calculateCostLyd(financeData.cost_try, financeData.fx_try_to_lyd)
+    ?? toNumber(finance?.cost_lyd);
 
-  const expensesTotal = expenses.reduce((sum, exp) => sum + (exp.amount_lyd || 0), 0);
-  const totalCostLyd = costLyd && financeData.shipping_lyd
-    ? costLyd + parseFloat(financeData.shipping_lyd) + expensesTotal
-    : finance?.cost_lyd && finance?.shipping_lyd
-    ? finance.cost_lyd + finance.shipping_lyd + expensesTotal
-    : null;
+  const expensesTotal = expenses.reduce((sum, exp) => sum + (toNumber(exp.amount_lyd) ?? 0), 0);
+  const totalCostLyd = calculateTotalCostLyd(
+    costLyd,
+    financeData.shipping_lyd !== '' ? financeData.shipping_lyd : finance?.shipping_lyd,
+    expensesTotal
+  );
 
-  const profitLyd = financeData.selling_price_lyd && totalCostLyd
-    ? parseFloat(financeData.selling_price_lyd) - totalCostLyd
-    : finance?.profit_lyd || null;
+  const profitLyd = calculateProfitLyd(
+    financeData.selling_price_lyd !== '' ? financeData.selling_price_lyd : finance?.selling_price_lyd,
+    totalCostLyd
+  ) ?? toNumber(finance?.profit_lyd);
 
   return (
     <div style={{
@@ -1150,7 +1157,7 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
               fontSize: '1.05rem',
               fontWeight: '500'
             }}>
-              {finance?.cost_try ? `${finance.cost_try} TRY` : '-'}
+              {formatMoney(finance?.cost_try, { suffix: 'TRY' })}
             </div>
           )}
         </div>
@@ -1217,7 +1224,7 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
               fontSize: '1.05rem',
               fontWeight: '500'
             }}>
-              {finance?.fx_try_to_lyd || '-'}
+              {formatMoney(finance?.fx_try_to_lyd, { digits: 4 })}
             </div>
           )}
         </div>
@@ -1235,7 +1242,7 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
             fontWeight: '600',
             border: '2px solid #fde68a'
           }}>
-            {costLyd ? `${costLyd.toFixed(2)} LYD` : '-'}
+            {formatMoney(costLyd, { suffix: 'LYD' })}
           </div>
         </div>
 
@@ -1271,7 +1278,7 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
               fontSize: '1.05rem',
               fontWeight: '500'
             }}>
-              {finance?.shipping_lyd ? `${finance.shipping_lyd} LYD` : '-'}
+              {formatMoney(finance?.shipping_lyd, { suffix: 'LYD' })}
             </div>
           )}
         </div>
@@ -1308,7 +1315,7 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
               fontSize: '1.05rem',
               fontWeight: '500'
             }}>
-              {finance?.selling_price_lyd ? `${finance.selling_price_lyd} LYD` : '-'}
+              {formatMoney(finance?.selling_price_lyd, { suffix: 'LYD' })}
             </div>
           )}
         </div>
@@ -1326,7 +1333,7 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
             fontWeight: '600',
             border: '2px solid #fecaca'
           }}>
-            {totalCostLyd ? `${totalCostLyd.toFixed(2)} LYD` : '-'}
+            {formatMoney(totalCostLyd, { suffix: 'LYD' })}
           </div>
         </div>
 
@@ -1455,10 +1462,10 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
             onClick={() => {
               setEditingFinance(false);
               setFinanceData({
-                cost_try: finance?.cost_try || '',
-                fx_try_to_lyd: finance?.fx_try_to_lyd || '',
-                shipping_lyd: finance?.shipping_lyd || '',
-                selling_price_lyd: finance?.selling_price_lyd || '',
+                cost_try: finance?.cost_try ?? '',
+                fx_try_to_lyd: finance?.fx_try_to_lyd ?? '',
+                shipping_lyd: finance?.shipping_lyd ?? '',
+                selling_price_lyd: finance?.selling_price_lyd ?? '',
                 owner_notes: finance?.owner_notes || ''
               });
             }}
@@ -1779,7 +1786,7 @@ function ProductRow({ product, editing, editingProduct, setEditingProduct, onUpd
             type="number"
             step="0.01"
             min="0"
-            value={productData.selling_price_lyd || ''}
+            value={productData.selling_price_lyd ?? ''}
             onChange={(e) => setProductData({ ...productData, selling_price_lyd: e.target.value })}
             placeholder="0.00"
             style={{
@@ -1792,7 +1799,9 @@ function ProductRow({ product, editing, editingProduct, setEditingProduct, onUpd
             }}
           />
         ) : (
-          product.selling_price_lyd ? `${product.selling_price_lyd} LYD` : '-'
+          product.selling_price_lyd != null && product.selling_price_lyd !== ''
+            ? formatMoney(product.selling_price_lyd, { suffix: 'LYD' })
+            : '-'
         )}
       </td>
       {!editing && (

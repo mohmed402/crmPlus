@@ -553,7 +553,7 @@ export default function NewOrderPage() {
                             type="number"
                             step="0.01"
                             min="0"
-                            value={product.selling_price_lyd || ''}
+                            value={product.selling_price_lyd ?? ''}
                             onChange={(e) => updateProduct(index, 'selling_price_lyd', e.target.value)}
                             placeholder="0.00"
                             style={{
