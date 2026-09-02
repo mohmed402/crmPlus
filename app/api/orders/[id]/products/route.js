@@ -7,6 +7,7 @@ import {
   getOrderProducts 
 } from '@/lib/orderProducts';
 import { recalculateProfit } from '@/lib/finance';
+import { recordOrderEvent } from '@/lib/orderEvents';
 
 export async function GET(request, { params }) {
   try {
@@ -46,6 +47,13 @@ export async function POST(request, { params }) {
     await createOrderProduct(parseInt(params.id), productData);
     
     await recalculateProfit(parseInt(params.id), { syncSellingPrice: true });
+    await recordOrderEvent({
+      orderId: parseInt(params.id),
+      eventType: 'product_added',
+      actorId: parseInt(userId),
+      summary: 'تم إضافة منتج',
+      metadata: { product_name: productData.product_name }
+    });
     
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -72,6 +80,13 @@ export async function PUT(request, { params }) {
     await updateOrderProduct(productId, productData);
     
     await recalculateProfit(parseInt(params.id), { syncSellingPrice: true });
+    await recordOrderEvent({
+      orderId: parseInt(params.id),
+      eventType: 'product_updated',
+      actorId: parseInt(userId),
+      summary: 'تم تعديل منتج',
+      metadata: { product_id: productId, product_name: productData.product_name }
+    });
     
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -107,6 +122,13 @@ export async function DELETE(request, { params }) {
     await deleteOrderProduct(parseInt(productId));
     
     await recalculateProfit(parseInt(params.id), { syncSellingPrice: true });
+    await recordOrderEvent({
+      orderId: parseInt(params.id),
+      eventType: 'product_deleted',
+      actorId: parseInt(userId),
+      summary: 'تم حذف منتج',
+      metadata: { product_id: parseInt(productId) }
+    });
     
     return NextResponse.json({ success: true });
   } catch (error) {

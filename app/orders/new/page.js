@@ -13,8 +13,8 @@ export default function NewOrderPage() {
     address: '',
     notes: '',
     status: 'New',
-    deposit_paid: false,
-    amount_paid: 0
+    amount_paid: '',
+    payment_method: 'cash'
   });
   const [socialMedia, setSocialMedia] = useState({
     facebook: '',
@@ -228,35 +228,17 @@ export default function NewOrderPage() {
                 />
               </div>
 
-              {/* Payment Information */}
               <div style={{ marginTop: '1.5rem', paddingTop: '1.5rem', borderTop: '1px solid #e5e7eb' }}>
                 <h3 style={{ fontSize: '1rem', fontWeight: '600', color: '#18375C', marginBottom: '1rem' }}>
-                  معلومات الدفع
+                  دفعة أولى (اختياري)
                 </h3>
-                
-                <div style={{ marginBottom: '1rem' }}>
-                  <label style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', cursor: 'pointer' }}>
-                    <input
-                      type="checkbox"
-                      name="deposit_paid"
-                      checked={formData.deposit_paid}
-                      onChange={(e) => setFormData({ ...formData, deposit_paid: e.target.checked })}
-                      style={{
-                        width: '1.25rem',
-                        height: '1.25rem',
-                        cursor: 'pointer',
-                        accentColor: '#18375C'
-                      }}
-                    />
-                    <span style={{ color: '#374151', fontWeight: '500' }}>
-                      تم دفع الدفعة المقدمة
-                    </span>
-                  </label>
-                </div>
+                <p style={{ color: '#6b7280', fontSize: '0.875rem', marginBottom: '1rem' }}>
+                  سيتم تسجيل هذا المبلغ كأول قيد في سجل دفعات الطلب.
+                </p>
 
                 <div style={{ marginBottom: '1rem' }}>
                   <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
-                    المبلغ المدفوع (LYD)
+                    مبلغ الدفعة (LYD)
                   </label>
                   <input
                     type="number"
@@ -275,6 +257,30 @@ export default function NewOrderPage() {
                       fontFamily: 'inherit'
                     }}
                   />
+                </div>
+
+                <div style={{ marginBottom: '1rem' }}>
+                  <label style={{ display: 'block', marginBottom: '0.5rem', color: '#374151', fontWeight: '500' }}>
+                    طريقة الدفع
+                  </label>
+                  <select
+                    name="payment_method"
+                    value={formData.payment_method}
+                    onChange={handleChange}
+                    style={{
+                      width: '100%',
+                      padding: '0.75rem',
+                      border: '1px solid #d1d5db',
+                      borderRadius: '6px',
+                      fontSize: '1rem',
+                      fontFamily: 'inherit',
+                      backgroundColor: 'white'
+                    }}
+                  >
+                    <option value="cash">نقداً</option>
+                    <option value="transfer">تحويل</option>
+                    <option value="other">أخرى</option>
+                  </select>
                 </div>
               </div>
 

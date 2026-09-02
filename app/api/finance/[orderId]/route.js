@@ -1,6 +1,7 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createOrUpdateOrderFinance } from '@/lib/finance';
+import { recordOrderEvent } from '@/lib/orderEvents';
 
 export async function POST(request, { params }) {
   try {
@@ -35,6 +36,12 @@ export async function POST(request, { params }) {
     const financeData = await request.json();
     console.log('Saving finance data for order:', params.orderId, financeData);
     await createOrUpdateOrderFinance(parseInt(params.orderId), financeData);
+    await recordOrderEvent({
+      orderId: parseInt(params.orderId),
+      eventType: 'finance_updated',
+      actorId: parseInt(userId),
+      summary: 'تم تحديث المعلومات المالية'
+    });
     
     return NextResponse.json({ success: true });
   } catch (error) {

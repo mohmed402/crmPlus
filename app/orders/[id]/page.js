@@ -9,8 +9,11 @@ import {
   calculateProfitLyd,
   calculateTotalCostLyd,
   formatMoney,
-  toNumber
+  toNumber,
+  calculateRemaining
 } from '@/lib/money';
+import OrderPayments from '../../components/OrderPayments';
+import OrderTimeline from '../../components/OrderTimeline';
 
 export default function OrderDetailPage() {
   const params = useParams();
@@ -19,6 +22,9 @@ export default function OrderDetailPage() {
   const [products, setProducts] = useState([]);
   const [finance, setFinance] = useState(null);
   const [expenses, setExpenses] = useState([]);
+  const [payments, setPayments] = useState([]);
+  const [events, setEvents] = useState([]);
+  const [balance, setBalance] = useState({ netPaid: 0, remaining: null });
   const [user, setUser] = useState(null);
   const [loading, setLoading] = useState(true);
   const [editing, setEditing] = useState(false);
@@ -55,6 +61,9 @@ export default function OrderDetailPage() {
         if (data.expenses) {
           setExpenses(data.expenses);
         }
+        setPayments(data.payments || []);
+        setEvents(data.events || []);
+        setBalance(data.balance || { netPaid: 0, remaining: null });
       }
       setLoading(false);
     } catch (error) {
@@ -326,78 +335,36 @@ export default function OrderDetailPage() {
 
               <div>
                 <label style={{ display: 'block', marginBottom: '0.75rem', color: '#6b7280', fontWeight: '600', fontSize: '0.875rem', textTransform: 'uppercase' }}>
-                  حالة الدفعة المقدمة
+                  حالة الدفعة
                 </label>
-                {editing ? (
-                  <div style={{ display: 'flex', alignItems: 'center', gap: '0.5rem', padding: '0.875rem' }}>
-                    <input
-                      type="checkbox"
-                      name="deposit_paid"
-                      checked={formData.deposit_paid || false}
-                      onChange={(e) => setFormData({ ...formData, deposit_paid: e.target.checked })}
-                      style={{
-                        width: '1.25rem',
-                        height: '1.25rem',
-                        cursor: 'pointer',
-                        accentColor: '#18375C'
-                      }}
-                    />
-                    <span style={{ fontSize: '1rem', color: '#1f2937', fontWeight: '500' }}>
-                      تم دفع الدفعة المقدمة
-                    </span>
-                  </div>
-                ) : (
-                  <div style={{ 
-                    padding: '0.875rem', 
-                    backgroundColor: order.deposit_paid ? '#d1fae5' : '#fee2e2', 
-                    borderRadius: '8px',
-                    color: order.deposit_paid ? '#065f46' : '#991b1b',
-                    fontSize: '1.05rem',
-                    fontWeight: '600',
-                    border: order.deposit_paid ? '2px solid #10b981' : '2px solid #ef4444',
-                    textAlign: 'center'
-                  }}>
-                    {order.deposit_paid ? '✓ تم الدفع' : '✗ لم يتم الدفع'}
-                  </div>
-                )}
+                <div style={{ 
+                  padding: '0.875rem', 
+                  backgroundColor: order.deposit_paid ? '#d1fae5' : '#fee2e2', 
+                  borderRadius: '8px',
+                  color: order.deposit_paid ? '#065f46' : '#991b1b',
+                  fontSize: '1.05rem',
+                  fontWeight: '600',
+                  border: order.deposit_paid ? '2px solid #10b981' : '2px solid #ef4444',
+                  textAlign: 'center'
+                }}>
+                  {order.deposit_paid ? '✓ يوجد مبلغ مدفوع' : '✗ لا يوجد دفع'}
+                </div>
               </div>
 
               <div>
                 <label style={{ display: 'block', marginBottom: '0.75rem', color: '#6b7280', fontWeight: '600', fontSize: '0.875rem', textTransform: 'uppercase' }}>
                   المبلغ المدفوع (LYD)
                 </label>
-                {editing ? (
-                  <input
-                    type="number"
-                    name="amount_paid"
-                    value={formData.amount_paid || 0}
-                    onChange={handleChange}
-                    step="0.01"
-                    min="0"
-                    style={{
-                      width: '100%',
-                      padding: '0.875rem',
-                      border: '2px solid #e5e7eb',
-                      borderRadius: '8px',
-                      fontSize: '1rem',
-                      transition: 'border-color 0.2s',
-                      outline: 'none'
-                    }}
-                    onFocus={(e) => e.target.style.borderColor = '#18375C'}
-                    onBlur={(e) => e.target.style.borderColor = '#e5e7eb'}
-                  />
-                ) : (
-                  <div style={{ 
-                    padding: '0.875rem', 
-                    backgroundColor: '#f9fafb', 
-                    borderRadius: '8px',
-                    color: '#1f2937',
-                    fontSize: '1.05rem',
-                    fontWeight: '500'
-                  }}>
-                    {order.amount_paid ? `${parseFloat(order.amount_paid).toFixed(2)} LYD` : '0.00 LYD'}
-                  </div>
-                )}
+                <div style={{ 
+                  padding: '0.875rem', 
+                  backgroundColor: '#f9fafb', 
+                  borderRadius: '8px',
+                  color: '#1f2937',
+                  fontSize: '1.05rem',
+                  fontWeight: '500'
+                }}>
+                  {formatMoney(balance.netPaid ?? order.amount_paid, { suffix: 'LYD' })}
+                </div>
               </div>
 
               <div style={{ gridColumn: 'span 2' }}>
@@ -719,6 +686,17 @@ export default function OrderDetailPage() {
             )}
           </div>
 
+          <OrderPayments
+            orderId={order.id}
+            payments={payments}
+            netPaid={balance.netPaid ?? order.amount_paid ?? 0}
+            depositPaid={order.deposit_paid}
+            isOwner={user?.role === 'owner'}
+            onUpdate={fetchOrder}
+          />
+
+          <OrderTimeline events={events} />
+
           {/* Products Section */}
           <div style={{
             backgroundColor: 'white',
@@ -960,6 +938,8 @@ export default function OrderDetailPage() {
                 order={order}
                 finance={finance} 
                 expenses={expenses}
+                remaining={balance.remaining}
+                netPaid={balance.netPaid ?? order.amount_paid ?? 0}
                 onUpdate={fetchOrder}
               />
             </div>
@@ -970,7 +950,7 @@ export default function OrderDetailPage() {
   );
 }
 
-function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
+function OwnerFinanceSection({ orderId, order, finance, expenses, remaining, netPaid, onUpdate }) {
   const [financeData, setFinanceData] = useState({
     cost_try: finance?.cost_try ?? '',
     fx_try_to_lyd: finance?.fx_try_to_lyd ?? '',
@@ -1081,6 +1061,13 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
     financeData.selling_price_lyd !== '' ? financeData.selling_price_lyd : finance?.selling_price_lyd,
     totalCostLyd
   ) ?? toNumber(finance?.profit_lyd);
+
+  const remainingAmount = remaining !== null && remaining !== undefined
+    ? remaining
+    : calculateRemaining(
+      financeData.selling_price_lyd !== '' ? financeData.selling_price_lyd : finance?.selling_price_lyd,
+      netPaid ?? order?.amount_paid
+    );
 
   return (
     <div style={{
@@ -1371,7 +1358,7 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
             fontWeight: '600',
             border: '2px solid #93c5fd'
           }}>
-            {order?.amount_paid ? `${parseFloat(order.amount_paid).toFixed(2)} LYD` : '0.00 LYD'}
+            {formatMoney(netPaid ?? order?.amount_paid, { suffix: 'LYD' })}
           </div>
         </div>
 
@@ -1381,38 +1368,24 @@ function OwnerFinanceSection({ orderId, order, finance, expenses, onUpdate }) {
           </label>
           <div style={{ 
             padding: '0.875rem', 
-            backgroundColor: (() => {
-              const remaining = (finance?.selling_price_lyd || 0) - (order?.amount_paid || 0);
-              return remaining <= 0 ? '#d1fae5' : '#fef3c7';
-            })(),
+            backgroundColor: remainingAmount == null ? '#f9fafb' : remainingAmount <= 0 ? '#d1fae5' : '#fef3c7',
             borderRadius: '8px',
-            color: (() => {
-              const remaining = (finance?.selling_price_lyd || 0) - (order?.amount_paid || 0);
-              return remaining <= 0 ? '#065f46' : '#92400e';
-            })(),
+            color: remainingAmount == null ? '#1f2937' : remainingAmount <= 0 ? '#065f46' : '#92400e',
             fontSize: '1.25rem',
             fontWeight: '700',
-            border: (() => {
-              const remaining = (finance?.selling_price_lyd || 0) - (order?.amount_paid || 0);
-              return remaining <= 0 ? '2px solid #10b981' : '2px solid #fde68a';
-            })(),
+            border: remainingAmount == null ? '2px solid #e5e7eb' : remainingAmount <= 0 ? '2px solid #10b981' : '2px solid #fde68a',
             display: 'flex',
             alignItems: 'center',
             gap: '0.5rem'
           }}>
-            {(() => {
-              const sellingPrice = parseFloat(finance?.selling_price_lyd) || 0;
-              const amountPaid = parseFloat(order?.amount_paid) || 0;
-              const remaining = sellingPrice - amountPaid;
-              return remaining <= 0 ? (
-                <>
-                  <span style={{ fontSize: '1.5rem' }}>✓</span>
-                  تم الدفع بالكامل
-                </>
-              ) : (
-                `${remaining.toFixed(2)} LYD`
-              );
-            })()}
+            {remainingAmount == null ? '-' : remainingAmount <= 0 ? (
+              <>
+                <span style={{ fontSize: '1.5rem' }}>✓</span>
+                تم الدفع بالكامل
+              </>
+            ) : (
+              formatMoney(remainingAmount, { suffix: 'LYD' })
+            )}
           </div>
         </div>
 
