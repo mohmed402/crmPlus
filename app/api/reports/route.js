@@ -2,6 +2,7 @@ import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { getTotalProfit, getTotalExpenses } from '@/lib/finance';
 import { getTotalGeneralExpenses } from '@/lib/generalExpenses';
+import { calculateNetProfit } from '@/lib/money';
 
 export async function GET(request) {
   try {
@@ -33,8 +34,8 @@ export async function GET(request) {
       totalProfit,
       totalExpenses, // Order-specific expenses
       generalExpenses, // General business expenses
-      totalAllExpenses: totalExpenses + generalExpenses, // Combined expenses
-      netProfit: totalProfit - totalExpenses - generalExpenses // Net profit after all expenses
+      totalAllExpenses: totalExpenses + generalExpenses, // Combined expenses (display only)
+      netProfit: calculateNetProfit(totalProfit, generalExpenses) // Order profit already includes order expenses
     });
   } catch (error) {
     console.error('Error fetching reports:', error);

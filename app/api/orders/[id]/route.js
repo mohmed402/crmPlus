@@ -4,6 +4,9 @@ import { getOrderById, updateOrder, deleteOrder } from '@/lib/orders';
 import { getOrderFinance } from '@/lib/finance';
 import { getExpenses } from '@/lib/finance';
 import { getOrderProducts } from '@/lib/orderProducts';
+import { getOrderBalance } from '@/lib/payments';
+import { getOrderEvents } from '@/lib/orderEvents';
+import { calculateRemaining } from '@/lib/money';
 
 export async function GET(request, { params }) {
   try {
@@ -28,14 +31,27 @@ export async function GET(request, { params }) {
     }
     
     const products = await getOrderProducts(parseInt(params.id));
-    const response = { order, products };
+    const isOwner = userRole === 'owner';
+    const { payments, netPaid } = await getOrderBalance(parseInt(params.id));
+    const events = await getOrderEvents(parseInt(params.id), {
+      includeFinancial: isOwner
+    });
+
+    const response = {
+      order,
+      products,
+      payments,
+      events,
+      balance: { netPaid }
+    };
     
     // Only owner can see finance data
-    if (userRole === 'owner') {
+    if (isOwner) {
       const finance = await getOrderFinance(parseInt(params.id));
       const expenses = await getExpenses(parseInt(params.id));
       response.finance = finance;
       response.expenses = expenses;
+      response.balance.remaining = calculateRemaining(finance?.selling_price_lyd, netPaid);
     }
     
     return NextResponse.json(response);
@@ -60,7 +76,7 @@ export async function PUT(request, { params }) {
     }
     
     const orderData = await request.json();
-    await updateOrder(parseInt(params.id), orderData);
+    await updateOrder(parseInt(params.id), orderData, parseInt(userId));
     
     return NextResponse.json({ success: true });
   } catch (error) {

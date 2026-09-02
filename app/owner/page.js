@@ -4,6 +4,7 @@ import { useEffect, useState } from 'react';
 import Navbar from '../components/Navbar';
 import { AuthGuard } from '../components/AuthGuard';
 import Link from 'next/link';
+import { formatMoney, toNumber } from '@/lib/money';
 
 export default function OwnerPage() {
   const [orders, setOrders] = useState([]);
@@ -148,9 +149,9 @@ export default function OwnerPage() {
               }}>
                 {reports ? `${reports.netProfit.toFixed(2)} LYD` : '0.00 LYD'}
               </div>
-              {reports && reports.totalAllExpenses > 0 && (
+              {reports && reports.generalExpenses > 0 && (
                 <div style={{ fontSize: '0.75rem', color: '#6b7280', marginTop: '0.5rem' }}>
-                  بعد خصم {reports.totalAllExpenses.toFixed(2)} LYD مصروفات
+                  بعد خصم {reports.generalExpenses.toFixed(2)} LYD مصروفات عامة
                 </div>
               )}
             </div>
@@ -298,18 +299,18 @@ function OrderRowWithFinance({ order, formatDate }) {
         )}
       </td>
       <td style={{ padding: '1rem', color: '#6b7280' }}>
-        {loading ? '-' : finance?.cost_lyd ? `${finance.cost_lyd.toFixed(2)}` : '-'}
+        {loading ? '-' : formatMoney(finance?.cost_lyd)}
       </td>
       <td style={{ padding: '1rem', color: '#6b7280' }}>
-        {loading ? '-' : finance?.selling_price_lyd ? `${finance.selling_price_lyd.toFixed(2)}` : '-'}
+        {loading ? '-' : formatMoney(finance?.selling_price_lyd)}
       </td>
       <td style={{ padding: '1rem' }}>
-        {loading ? '-' : finance && finance.profit_lyd !== null && finance.profit_lyd !== undefined ? (
+        {loading ? '-' : toNumber(finance?.profit_lyd) !== null ? (
           <span style={{
             color: finance.profit_lyd >= 0 ? '#2caf76' : '#ef4444',
             fontWeight: 'bold'
           }}>
-            {finance.profit_lyd.toFixed(2)}
+            {formatMoney(finance.profit_lyd)}
           </span>
         ) : '-'}
       </td>

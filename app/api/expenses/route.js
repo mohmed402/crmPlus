@@ -1,10 +1,12 @@
 import { NextResponse } from 'next/server';
 import { cookies } from 'next/headers';
 import { createExpense, deleteExpense } from '@/lib/finance';
+import { recordOrderEvent } from '@/lib/orderEvents';
 
 export async function POST(request) {
   try {
     const cookieStore = await cookies();
+    const userId = cookieStore.get('user_id')?.value;
     const userRole = cookieStore.get('user_role')?.value;
     
     if (!userRole || userRole !== 'owner') {
@@ -16,6 +18,13 @@ export async function POST(request) {
     
     const { orderId, title, amount_lyd } = await request.json();
     await createExpense(orderId, { title, amount_lyd });
+    await recordOrderEvent({
+      orderId,
+      eventType: 'expense_added',
+      actorId: userId ? parseInt(userId) : null,
+      summary: 'تم إضافة مصروف',
+      metadata: { title, amount_lyd }
+    });
     
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -29,6 +38,7 @@ export async function POST(request) {
 export async function DELETE(request) {
   try {
     const cookieStore = await cookies();
+    const userId = cookieStore.get('user_id')?.value;
     const userRole = cookieStore.get('user_role')?.value;
     
     if (!userRole || userRole !== 'owner') {
@@ -48,7 +58,16 @@ export async function DELETE(request) {
       );
     }
     
-    await deleteExpense(parseInt(expenseId));
+    const orderId = await deleteExpense(parseInt(expenseId));
+    if (orderId) {
+      await recordOrderEvent({
+        orderId,
+        eventType: 'expense_deleted',
+        actorId: userId ? parseInt(userId) : null,
+        summary: 'تم حذف مصروف',
+        metadata: { expense_id: parseInt(expenseId) }
+      });
+    }
     
     return NextResponse.json({ success: true });
   } catch (error) {

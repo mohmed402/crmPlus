@@ -5,6 +5,7 @@ import Navbar from '../../components/Navbar';
 import { AuthGuard } from '../../components/AuthGuard';
 import Link from 'next/link';
 import Image from 'next/image';
+import { formatMoney, toNumber } from '@/lib/money';
 
 export default function AdminCustomersPage() {
   const [customers, setCustomers] = useState([]);
@@ -443,14 +444,14 @@ export default function AdminCustomersPage() {
                               </span>
                             </td>
                             <td style={{ padding: '0.75rem', color: '#f59e0b', fontWeight: '600' }}>
-                              {order.selling_price_lyd ? `${parseFloat(order.selling_price_lyd).toFixed(2)} LYD` : '-'}
+                              {formatMoney(order.selling_price_lyd, { suffix: 'LYD' })}
                             </td>
                             <td style={{ padding: '0.75rem' }}>
                               <span style={{
-                                color: (order.profit_lyd || 0) >= 0 ? '#2caf76' : '#ef4444',
+                                color: (toNumber(order.profit_lyd) ?? 0) >= 0 ? '#2caf76' : '#ef4444',
                                 fontWeight: 'bold'
                               }}>
-                                {order.profit_lyd ? `${parseFloat(order.profit_lyd).toFixed(2)} LYD` : '-'}
+                                {formatMoney(order.profit_lyd, { suffix: 'LYD' })}
                               </span>
                             </td>
                             <td style={{ padding: '0.75rem', color: '#6b7280', fontSize: '0.875rem' }}>

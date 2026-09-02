@@ -66,12 +66,26 @@ A comprehensive CRM system for managing orders with role-based access control, f
    - Daily exchange rates (TRY → LYD)
    - Can be used to quickly fill finance forms
 
+6. **order_payments**
+   - Payment/refund ledger per order
+   - `orders.amount_paid` and `orders.deposit_paid` are cached from this table
+   - Workers can add payments; owners can refund or delete entries
+
+7. **order_events**
+   - Order timeline: status changes, payments, product edits, and related updates
+   - Finance/expense events are owner-only on the order page
+
+Run [`sql/001_order_events_and_payments.sql`](sql/001_order_events_and_payments.sql) in the Supabase SQL editor to create these tables and backfill existing `amount_paid` values.
+
 ## Profit Calculation
 
 ```
-Total Cost (LYD) = (Cost TRY × Exchange Rate) + Shipping LYD + Sum of Expenses
-Profit (LYD) = Selling Price LYD - Total Cost LYD
+Total Cost (LYD) = (Cost TRY × Exchange Rate) + Shipping LYD + Sum of Order Expenses
+Order Profit (LYD) = Selling Price LYD - Total Cost LYD
+Net Profit (LYD) = Order Profit - General Business Expenses
 ```
+
+Order profit already includes per-order expenses. The owner report still shows those expenses as their own total, but net profit only subtracts general business expenses.
 
 ## Getting Started
 
@@ -122,7 +136,11 @@ crmPlus/
 │   ├── db.js            # Database initialization
 │   ├── auth.js          # Authentication utilities
 │   ├── orders.js        # Order operations
-│   └── finance.js       # Financial calculations
+│   ├── finance.js       # Financial calculations
+│   ├── payments.js      # Payment ledger
+│   └── orderEvents.js   # Order timeline
+├── sql/
+│   └── 001_order_events_and_payments.sql
 └── crmplus.db           # SQLite database (created automatically)
 ```
 
@@ -155,13 +173,23 @@ crmPlus/
 4. Click "إضافة مصروفات" (Add Expense)
 5. Expenses automatically reduce profit
 
+### Recording Payments
+
+1. Open an order
+2. Use "سجل الدفعات" to add a payment (cash, transfer, or other)
+3. Owners can also record a refund or delete a ledger row
+4. Total paid and deposit status are calculated from the ledger
+5. Remaining balance is shown to owners only in the finance section
+6. Status changes and edits appear in "سجل الطلب"
+
 ### Viewing Reports (Owner Only)
 
 1. Navigate to "صفحة المالك" (Owner Page)
 2. View summary cards:
-   - Total Profit
-   - Total Expenses
-   - Net Profit
+   - Total Profit (already after per-order expenses)
+   - Order Expenses
+   - General Expenses
+   - Net Profit (total profit minus general expenses only)
 3. Use filters:
    - Date range (All, Last Week, Last Month)
    - Status (All, Delivered only)
