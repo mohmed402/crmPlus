@@ -45,8 +45,7 @@ export async function POST(request, { params }) {
     const productData = await request.json();
     await createOrderProduct(parseInt(params.id), productData);
     
-    // Recalculate profit if selling price was added
-    await recalculateProfit(parseInt(params.id));
+    await recalculateProfit(parseInt(params.id), { syncSellingPrice: true });
     
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -72,8 +71,7 @@ export async function PUT(request, { params }) {
     const { productId, ...productData } = await request.json();
     await updateOrderProduct(productId, productData);
     
-    // Recalculate profit if selling price was updated
-    await recalculateProfit(parseInt(params.id));
+    await recalculateProfit(parseInt(params.id), { syncSellingPrice: true });
     
     return NextResponse.json({ success: true });
   } catch (error) {
@@ -108,8 +106,7 @@ export async function DELETE(request, { params }) {
     
     await deleteOrderProduct(parseInt(productId));
     
-    // Recalculate profit after product deletion
-    await recalculateProfit(parseInt(params.id));
+    await recalculateProfit(parseInt(params.id), { syncSellingPrice: true });
     
     return NextResponse.json({ success: true });
   } catch (error) {

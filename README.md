@@ -69,9 +69,12 @@ A comprehensive CRM system for managing orders with role-based access control, f
 ## Profit Calculation
 
 ```
-Total Cost (LYD) = (Cost TRY × Exchange Rate) + Shipping LYD + Sum of Expenses
-Profit (LYD) = Selling Price LYD - Total Cost LYD
+Total Cost (LYD) = (Cost TRY × Exchange Rate) + Shipping LYD + Sum of Order Expenses
+Order Profit (LYD) = Selling Price LYD - Total Cost LYD
+Net Profit (LYD) = Order Profit - General Business Expenses
 ```
+
+Order profit already includes per-order expenses. The owner report still shows those expenses as their own total, but net profit only subtracts general business expenses.
 
 ## Getting Started
 
@@ -159,9 +162,10 @@ crmPlus/
 
 1. Navigate to "صفحة المالك" (Owner Page)
 2. View summary cards:
-   - Total Profit
-   - Total Expenses
-   - Net Profit
+   - Total Profit (already after per-order expenses)
+   - Order Expenses
+   - General Expenses
+   - Net Profit (total profit minus general expenses only)
 3. Use filters:
    - Date range (All, Last Week, Last Month)
    - Status (All, Delivered only)
